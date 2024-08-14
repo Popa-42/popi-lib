@@ -9,7 +9,7 @@ setup(
     install_requires=[
         # add required packages here
     ],
-    author="Popa <3",
+    author="Popa-42 <3",
     author_email="prover09_reagent@icloud.com",
     description="A package with various helpful utilities.",
     long_description=open('README.md').read(),
