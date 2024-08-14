@@ -21,11 +21,11 @@ class ProgressBar:
     :param show_count_leading_zero: Whether to show the leading zero of the count of the progress.
     :param percentage_floating_digits: The number of floating digits to show in the percentage.
     """
-    def __init__(self, total: int, length: int = 20, initial_progress: int = 0, fill: str = "█", empty: str = " ",
-                 prefix: str = "", suffix: str = "", start_fill: str | None = None, end_fill: str | None = None,
-                 start_empty: str | None = None, end_empty: str | None = None, show_percent: bool = True,
-                 show_count: bool = True, show_count_leading_zero: bool = False,
-                 percentage_floating_digits: int = 2) -> None:
+
+    def __init__(self, total: int, length: int, initial_progress: int, fill: str, empty: str, prefix: str, suffix: str,
+                 start_fill: str | None, end_fill: str | None, start_empty: str | None = None,
+                 end_empty: str | None = None, show_percent: bool = True, show_count: bool = True,
+                 show_count_leading_zero: bool = False, percentage_floating_digits: int = 2) -> None:
         self.total = total
         self.length = length
         self.progress = initial_progress
@@ -117,7 +117,7 @@ class ProgressBar:
         return self
 
 
-class StandardProgressBar(ProgressBar):
+class Bar(ProgressBar):
     """
     A standard progress bar that uses the characters "#" and "-" to display the progress bar.
 
@@ -127,10 +127,11 @@ class StandardProgressBar(ProgressBar):
     :param prefix: The prefix of the progress bar.
     :param suffix: The suffix of the progress bar.
     """
-    def __init__(self, total: int, length: int = 20, initial_progress: int = 0, prefix: str = "", suffix: str = "",
+
+    def __init__(self, total: int, length: int = 20, initial_progress: int = 0, prefix: str = "Bar", suffix: str = "",
                  *args,
                  **kwargs) -> None:
-        super().__init__(total, length, initial_progress, "#", "-", prefix, suffix, "[", "]", *args, **kwargs)
+        super().__init__(total, length, initial_progress, "#", " ", prefix, suffix, "|", "|", *args, **kwargs)
 
 
 class FiraCodeProgressBar(ProgressBar):
@@ -145,6 +146,5 @@ class FiraCodeProgressBar(ProgressBar):
     """
 
     def __init__(self, total: int, length: int = 20, initial_progress: int = 0, prefix: str = "", suffix: str = "",
-                 *args,
-                 **kwargs) -> None:
+                 *args, **kwargs) -> None:
         super().__init__(total, length, initial_progress, "", "", prefix, suffix, "", "", "", "", *args, **kwargs)

@@ -3,7 +3,7 @@ import sys
 from setuptools import setup, find_packages
 
 setup(
-    name='custom_progess_indicators',
+    name='popilib',
     version='0.1',
     packages=find_packages(),
     install_requires=[
@@ -11,7 +11,7 @@ setup(
     ],
     author="Popa",
     author_email="prover09_reagent@icloud.com",
-    description="A package for highly customizable progess bars",
+    description="A package with various helpful utilities.",
     long_description=open('README.md').read(),
     long_description_content_type='text/markdown',
     classifiers=[

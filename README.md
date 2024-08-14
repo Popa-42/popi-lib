@@ -1,4 +1,4 @@
-# custom_progress_indicators
+# popilib
 
 A collection of highly customizable progress indicators
 
@@ -7,5 +7,5 @@ A collection of highly customizable progress indicators
 (DOES NOT WORK! I am still working on this)
 
 ```shell
-python.exe -m pip install custom_progress_indicators
+python.exe -m pip install popilib
 ```
