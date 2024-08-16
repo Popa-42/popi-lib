@@ -1,11 +1,11 @@
-# popilib
+# popi-lib
 
-A collection of highly customizable progress indicators
+A package with various helpful utilities.
 
 ## Installation
 
 (DOES NOT WORK! I am still working on this)
 
 ```shell
-python.exe -m pip install popilib
+python.exe -m pip install popi-lib
 ```
