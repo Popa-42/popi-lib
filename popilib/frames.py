@@ -1,65 +1,132 @@
-from escape_codes import text2escape, escape_code_dict
+from __future__ import annotations
+import sys
+
+from .escape_codes import text2escape as t2e, escape_code_dict
 from functools import reduce
 
 
-def create_frame(
-    text: str,
-    padding: int = 1,
-    length: int = ...,
-    frame_props: str = ""
-) -> str:
-    # Calculate max line width (without Escape Codes)
-    if length is ...:
-        max_length = max(
+class Frame:
+    reset = t2e("<reset>")
+
+    def __init__(self, lines: list[str] | str, padding: int = 1, width: int = ..., frame_props: str = "") -> None:
+        self.lines = lines.split('\n') if isinstance(lines, str) else lines
+        self.num_lines = len(self.lines)
+        self.padding = padding
+        self.width = width if width is not ... else max(
             [len(reduce(lambda x, line: x.replace(line, ''), escape_code_dict.keys(), line))
-             for line in text.split('\n')]
+             for line in self.lines]
         )
-    else:
-        max_length = length
+        self.frame_props = frame_props
 
-    # First frame line
-    top_border = f"{escape_code_dict[frame_props]}╭{'─' * (max_length + 2 * padding)}╮{escape_code_dict['<reset>']}"
+    def __enter__(self) -> Frame:
+        for line in self.create_frame():
+            sys.stdout.write(f"\033[K{line}\n")
+        sys.stdout.flush()
+        return self
 
-    # Process each line of the text
-    lines = []
-    for ln in text.split('\n'):
-        if "<hr>" not in ln:
-            # Calculate empty space before and after the text
-            clean_len = len(reduce(lambda x, k: x.replace(k, ''), escape_code_dict.keys(), ln))
-            line = (
-                f"{escape_code_dict[frame_props]}│{escape_code_dict['<reset>']}{' ' * padding}"
-                f"{text2escape(ln)}"
-                f"{' ' * (max_length - clean_len + padding)}"
-                f"{escape_code_dict[frame_props]}│{escape_code_dict['<reset>']}"
-            )
-        else:
-            # If <hr> contained, create a horizontal line
-            line = f"{escape_code_dict[frame_props]}├{'─' * (max_length + 2 * padding)}┤{escape_code_dict['<reset>']}"
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
 
-        lines.append(line)
+    def __repr__(self) -> str:
+        return "\n".join(self.create_frame())
 
-    # Last frame line
-    bottom_border = f"{escape_code_dict[frame_props]}╰{'─' * (max_length + 2 * padding)}╯{escape_code_dict['<reset>']}"
+    def add_ln(self, lines: list[str] | str):
+        """
+        Add a line to the frame.
+        :param lines: The line(s) to add.
+        :return: self
+        """
+        self.lines.extend(lines.split('\n') if isinstance(lines, str) else lines)
+        return self
 
-    # Create the frame
-    frame = "\n".join([top_border] + lines + [bottom_border])
+    def add_hr(self):
+        """
+        Add a horizontal line to the frame.
+        :return: self
+        """
+        self.lines.append("<hr>")
+        return self
 
-    return frame
+    def create_frame(self) -> list[str]:
+        """
+        Create the frame.
+        :return: The frame as a list of strings.
+        """
+        self.update()
 
+        # First frame line
+        top_border = f"{t2e(self.frame_props)}╭{'─' * (self.width + 2 * self.padding)}╮{self.reset}"
 
-# The exact same function as above, but in extremely compact form
-# Why? Because it is possible
-def cf(text: str, padding: int = 1, length: int = ..., frame_props: str = "") -> str:
-    m = max([len(reduce(lambda x, k: x.replace(k, ''), escape_code_dict.keys(), k)) for k in text.split('\n')]) if length is ... else length
-    return "\n".join([escape_code_dict[frame_props] + "╭" + "─" * (m + 2 * padding) + "╮" + escape_code_dict["<reset>"]] + [f"{escape_code_dict[frame_props] + '│' + escape_code_dict['<reset>'] + ' ' * padding}{text2escape(ln)}{' ' * (m - len(reduce(lambda x, k: x.replace(k, ''), escape_code_dict.keys(), ln)) + padding)}{escape_code_dict[frame_props] + '│' + escape_code_dict['<reset>']}" if "<hr>" not in ln else f"{escape_code_dict[frame_props]}├{'─' * (m + 2 * padding)}┤{escape_code_dict['<reset>']}" for ln in text.split("\n")] + [escape_code_dict[frame_props] + "╰" + "─" * (m + 2 * padding) + "╯" + escape_code_dict['<reset>']])
+        # Process each line of the text
+        lines = []
+        for ln in self.lines:
+            if "<hr>" not in ln:
+                # Calculate empty space before and after the text
+                clean_len = len(reduce(lambda x, k: x.replace(k, ''), escape_code_dict.keys(), ln))
+                line = (
+                    f"{t2e(self.frame_props)}│{self.reset}{' ' * self.padding}"
+                    f"{t2e(ln)}"
+                    f"{' ' * (self.width - clean_len + self.padding)}"
+                    f"{t2e(self.frame_props)}│{self.reset}"
+                )
+            else:
+                # If <hr> contained, create a horizontal line
+                line = f"{t2e(self.frame_props)}├{'─' * (self.width + 2 * self.padding)}┤{self.reset}"
 
+            lines.append(line)
 
-if __name__ == '__main__':
-    test_content = """<b>Hello<reset> <u>World<reset>!
-<hr>
-<blue_bg><black><i> This is a test. <reset>
-Welcome to the world of <bright_blue>Pyt<bright_yellow>hon<reset>!
-<hr>
-Do you like it?"""
-    print(create_frame(test_content, 1, frame_props="<yellow>"))
-    print(cf(test_content, 1, frame_props="<yellow>"))
+        # Last frame line
+        bottom_border = f"{t2e(self.frame_props)}╰{'─' * (self.width + 2 * self.padding)}╯{self.reset}"
+
+        # Create the frame
+        frame = [top_border] + lines + [bottom_border]
+
+        return frame
+
+    def edit_line(self, line_num: int, new_line: str) -> Frame:
+        """
+        Edit a line of the frame.
+        :param line_num: The line index to edit.
+        :param new_line: The new line.
+        :return: self
+        """
+        self.lines[line_num] = new_line
+        return self
+
+    def update_width(self) -> Frame:
+        """
+        Update the width of the frame.
+        :return: self
+        """
+        self.width = max(
+            [len(reduce(lambda x, line: x.replace(line, ''), escape_code_dict.keys(), line))
+             for line in self.lines]
+        )
+        return self
+
+    def update_num_lines(self) -> Frame:
+        """
+        Update the number of lines in the frame.
+        :return: self
+        """
+        self.num_lines = len(self.lines)
+        return self
+
+    def update(self) -> Frame:
+        """
+        Update the frame.
+        :return: self
+        """
+        self.update_width().update_num_lines()
+        return self
+
+    def print(self) -> None:
+        """
+        Print the frame.
+        """
+        self.update_width()
+        sys.stdout.write(f"\033[{self.num_lines + 2}F")
+        sys.stdout.flush()
+        for line in self.create_frame():
+            sys.stdout.write(f"\033[K{line}\n")
+        sys.stdout.flush()
