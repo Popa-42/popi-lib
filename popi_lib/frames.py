@@ -1,132 +1,120 @@
 from __future__ import annotations
 import sys
-
-from .escape_codes import text2escape as t2e, escape_code_dict
 from functools import reduce
+from .escape_codes import text2escape as t2e, escape_code_dict
 
 
 class Frame:
-    reset = t2e("<reset>")
+    reset_code = t2e("<reset>")
 
-    def __init__(self, lines: list[str] | str, padding: int = 1, width: int = ..., frame_props: str = "") -> None:
-        self.lines = lines.split('\n') if isinstance(lines, str) else lines
-        self.num_lines = len(self.lines)
+    def __init__(self, content: list[str] | str, padding: int = 1, width: int = None, frame_style: str = "") -> None:
+        """
+        Initialize the Frame object.
+
+        :param content: List of strings or a single string to be framed.
+        :param padding: Padding around the text within the frame.
+        :param width: Width of the frame. If None, it will be auto-calculated.
+        :param frame_style: Escape code for frame styling.
+        """
+        self.lines = content.split('\n') if isinstance(content, str) else content
         self.padding = padding
-        self.width = width if width is not ... else max(
-            [len(reduce(lambda x, line: x.replace(line, ''), escape_code_dict.keys(), line))
-             for line in self.lines]
-        )
-        self.frame_props = frame_props
+        self.width = self._calculate_width() if width is None else width
+        self.frame_style = frame_style
+
+        self.add_ln = self.add_line
+        self.add_hr = self.add_horizontal_rule
+        self.edit_ln = self.edit_line
 
     def __enter__(self) -> Frame:
-        for line in self.create_frame():
-            sys.stdout.write(f"\033[K{line}\n")
-        sys.stdout.flush()
+        """Enter the runtime context for using 'with' statement."""
+        self._display_frame()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Exit the runtime context. No action needed."""
         pass
 
     def __repr__(self) -> str:
-        return "\n".join(self.create_frame())
+        """Return a string representation of the frame."""
+        return "\n".join(self._build_frame())
 
-    def add_ln(self, lines: list[str] | str):
+    def add_line(self, content: list[str] | str) -> Frame:
         """
-        Add a line to the frame.
-        :param lines: The line(s) to add.
-        :return: self
-        """
-        self.lines.extend(lines.split('\n') if isinstance(lines, str) else lines)
-        return self
+        Add lines to the frame.
 
-    def add_hr(self):
+        :param content: Line(s) to add to the frame.
+        :return: The updated Frame object.
         """
-        Add a horizontal line to the frame.
-        :return: self
+        self.lines.extend(content.split('\n') if isinstance(content, str) else content)
+        return self._update_frame()
+
+    def add_horizontal_rule(self) -> Frame:
+        """
+        Add a horizontal rule (divider) to the frame.
+
+        :return: The updated Frame object.
         """
         self.lines.append("<hr>")
         return self
 
-    def create_frame(self) -> list[str]:
+    def edit_line(self, line_index: int, new_content: str) -> Frame:
         """
-        Create the frame.
-        :return: The frame as a list of strings.
-        """
-        self.update()
+        Edit a specific line in the frame.
 
-        # First frame line
-        top_border = f"{t2e(self.frame_props)}╭{'─' * (self.width + 2 * self.padding)}╮{self.reset}"
-
-        # Process each line of the text
-        lines = []
-        for ln in self.lines:
-            if "<hr>" not in ln:
-                # Calculate empty space before and after the text
-                clean_len = len(reduce(lambda x, k: x.replace(k, ''), escape_code_dict.keys(), ln))
-                line = (
-                    f"{t2e(self.frame_props)}│{self.reset}{' ' * self.padding}"
-                    f"{t2e(ln)}"
-                    f"{' ' * (self.width - clean_len + self.padding)}"
-                    f"{t2e(self.frame_props)}│{self.reset}"
-                )
-            else:
-                # If <hr> contained, create a horizontal line
-                line = f"{t2e(self.frame_props)}├{'─' * (self.width + 2 * self.padding)}┤{self.reset}"
-
-            lines.append(line)
-
-        # Last frame line
-        bottom_border = f"{t2e(self.frame_props)}╰{'─' * (self.width + 2 * self.padding)}╯{self.reset}"
-
-        # Create the frame
-        frame = [top_border] + lines + [bottom_border]
-
-        return frame
-
-    def edit_line(self, line_num: int, new_line: str) -> Frame:
+        :param line_index: Index of the line to edit.
+        :param new_content: New content for the line.
+        :return: The updated Frame object.
         """
-        Edit a line of the frame.
-        :param line_num: The line index to edit.
-        :param new_line: The new line.
-        :return: self
-        """
-        self.lines[line_num] = new_line
-        return self
+        self.lines[line_index] = new_content
+        return self._update_frame()
 
-    def update_width(self) -> Frame:
-        """
-        Update the width of the frame.
-        :return: self
-        """
-        self.width = max(
-            [len(reduce(lambda x, line: x.replace(line, ''), escape_code_dict.keys(), line))
-             for line in self.lines]
-        )
-        return self
-
-    def update_num_lines(self) -> Frame:
-        """
-        Update the number of lines in the frame.
-        :return: self
-        """
-        self.num_lines = len(self.lines)
-        return self
-
-    def update(self) -> Frame:
-        """
-        Update the frame.
-        :return: self
-        """
-        self.update_width().update_num_lines()
-        return self
-
-    def print(self) -> None:
-        """
-        Print the frame.
-        """
-        self.update_width()
+    def print_frame(self) -> None:
+        """Print the frame to the console."""
+        self._update_frame()
         sys.stdout.write(f"\033[{self.num_lines + 2}F")
         sys.stdout.flush()
-        for line in self.create_frame():
+        self._display_frame()
+
+    def _display_frame(self) -> None:
+        """Write the frame to the console output."""
+        for line in self._build_frame():
             sys.stdout.write(f"\033[K{line}\n")
         sys.stdout.flush()
+
+    def _build_frame(self) -> list[str]:
+        """
+        Construct the frame with borders and content.
+
+        :return: List of strings representing the frame.
+        """
+        top_border = f"{t2e(self.frame_style)}╭{'─' * (self.width + 2 * self.padding)}╮{self.reset_code}"
+        bottom_border = f"{t2e(self.frame_style)}╰{'─' * (self.width + 2 * self.padding)}╯{self.reset_code}"
+
+        frame_lines = [top_border]
+        for line in self.lines:
+            if line == "<hr>":
+                frame_lines.append(f"{t2e(self.frame_style)}├{'─' * (self.width + 2 * self.padding)}┤{self.reset_code}")
+            else:
+                clean_length = len(reduce(lambda s, esc: s.replace(esc, ''), escape_code_dict.keys(), line))
+                padded_line = (
+                    f"{self.reset_code}{t2e(self.frame_style)}│{self.reset_code}{' ' * self.padding}"
+                    f"{t2e(line)}{' ' * (self.width - clean_length + self.padding)}"
+                    f"{self.reset_code}{t2e(self.frame_style)}│{self.reset_code}"
+                )
+                frame_lines.append(padded_line)
+
+        frame_lines.append(bottom_border)
+        return frame_lines
+
+    def _calculate_width(self) -> int:
+        """Calculate the width of the frame based on content."""
+        return max(
+            len(reduce(lambda s, esc: s.replace(esc, ''), escape_code_dict.keys(), line))
+            for line in self.lines
+        )
+
+    def _update_frame(self) -> Frame:
+        """Update the frame's dimensions and line count."""
+        self.width = self._calculate_width()
+        self.num_lines = len(self.lines)
+        return self

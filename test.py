@@ -29,23 +29,29 @@ def bar_test():
 def frame_test():
     test_content = """<b><bright_white>Hello<reset> <u>World<reset>!
 <hr>
-<blue_bg><black><i> This is a test. <reset>
-Welcome to the world of <bright_blue>Pyt<bright_yellow>hon<reset>!"""
-    frame = Frame(test_content, 2, frame_props="<bright_cyan>")
+<cyan_bg><black><i> This is a test. <reset>
+Welcome to the world of <bright_blue>Pyt<bright_yellow>ho<yellow>n<reset>!"""
+    frame = Frame(test_content, 2, frame_style="<bright_cyan>")
     with frame as f:
-        f.print()
+        f.print_frame()
         sleep(1)
-        f.add_hr().add_ln("This is a new line").print()
+        f.add_horizontal_rule().add_line("This is a new line").print_frame()
         sleep(1)
-        f.add_ln("This is another new line – a <i>looong<reset> line.").print()
+        txt = "This is another new line - "
+        f.add_line(txt).print_frame()
+        sleep(0.5)
+        for c in ["a ", "<i>", "l", "o", "o", "o", "n", "g", "<reset> ", "l", "i", "n", "e"]:
+            txt += c
+            f.edit_line(6, txt).print_frame()
+            sleep(0.1)
+        sleep(0.5)
+        f.add_hr().add_ln("Btw - I am aware that this frame is ugly\nas f*ck.").print_frame()
         sleep(1)
-        f.add_hr().add_ln("Btw - I am aware that this frame is ugly\naf.").print()
+        f.add_line("But it's just a test.").print_frame()
+        f.add_horizontal_rule()
+        f.add_line("Bye!")
         sleep(1)
-        f.add_ln("But it's just a test.").print()
-        f.add_hr()
-        f.add_ln("Bye!")
-        sleep(1)
-        f.print()
+        f.print_frame()
 
 
 if __name__ == "__main__":
