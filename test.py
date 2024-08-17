@@ -1,5 +1,5 @@
-from popilib.bars import (Bar, FiraCodeProgressBar)
-from popilib.frames import Frame
+from popi_lib.bars import Bar, FiraCodeProgressBar
+from popi_lib.frames import Frame
 from time import sleep
 
 total = 24

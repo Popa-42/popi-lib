@@ -7,5 +7,5 @@ A package with various helpful utilities.
 (DOES NOT WORK! I am still working on this)
 
 ```shell
-python.exe -m pip install popi-lib
+python.exe -m pip install popi_lib
 ```
