@@ -1,3 +1,8 @@
+import os
+import sys
+
+import colorama
+
 escape_code_dict: dict = {
     "": "",
     "<reset>": "\033[0m",
@@ -40,7 +45,29 @@ escape_code_dict: dict = {
 }
 
 
+def terminal_supports_colors() -> bool:
+    """
+    Check if the terminal supports ANSI escape codes.
+
+    :return: True if the terminal supports ANSI escape codes, False otherwise.
+    """
+    # Initialise colorama
+    if os.name == "nt":
+        colorama.init()
+    # Check if the terminal runs on Windows and supports ANSI escape codes
+    if os.name == "nt":
+        return sys.stdout.isatty()
+
+    # Check if the terminal runs on Unix and supports ANSI escape codes
+    if sys.platform != "win32" and sys.stdout.isatty():
+        return True
+    return False
+
+
 def text2escape(html: str) -> str:
     for key, value in escape_code_dict.items():
-        html = html.replace(key, value)
+        if terminal_supports_colors():
+            html = html.replace(key, value)
+        else:
+            html = html.replace(key, "")
     return html

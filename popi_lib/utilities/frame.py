@@ -1,10 +1,12 @@
 from __future__ import annotations
 import sys
 from functools import reduce
-from .escape_codes import text2escape as t2e, escape_code_dict
+
+from ..core import Base
+from ..escape_codes import text2escape as t2e, escape_code_dict, terminal_supports_colors as tsc
 
 
-class Frame:
+class Frame(Base):
     reset_code = t2e("<reset>")
 
     def __init__(self, content: list[str] | str, padding: int = 1, width: int = None, frame_style: str = "") -> None:
@@ -20,6 +22,7 @@ class Frame:
         self.padding = padding
         self.width = self._calculate_width() if width is None else width
         self.frame_style = frame_style
+        self.num_lines = len(self.lines)
 
         self.add_ln = self.add_line
         self.add_hr = self.add_horizontal_rule
@@ -70,13 +73,17 @@ class Frame:
 
     def print_frame(self) -> None:
         """Print the frame to the console."""
-        self._update_frame()
+        self.width = self._calculate_width()
         sys.stdout.write(f"\033[{self.num_lines + 2}F")
         sys.stdout.flush()
         self._display_frame()
+        self.num_lines = len(self.lines)
 
     def _display_frame(self) -> None:
         """Write the frame to the console output."""
+        if not tsc():
+            self.logger.critical("Terminal does not fully support ANSI escape codes. Frame cannot be displayed.")
+            return
         for line in self._build_frame():
             sys.stdout.write(f"\033[K{line}\n")
         sys.stdout.flush()
@@ -116,5 +123,4 @@ class Frame:
     def _update_frame(self) -> Frame:
         """Update the frame's dimensions and line count."""
         self.width = self._calculate_width()
-        self.num_lines = len(self.lines)
         return self

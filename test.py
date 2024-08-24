@@ -1,6 +1,8 @@
-from popi_lib.bars import Bar, FiraCodeProgressBar
-from popi_lib.frames import Frame
 from time import sleep
+
+from popi_lib.utilities.progressbar import Bar, FiraCodeProgressBar
+from popi_lib.utilities.frame import Frame
+
 
 total = 24
 length = 25
@@ -8,7 +10,9 @@ length = 25
 
 def main():
     # bar_test()
-    frame_test()
+    # frame_test()
+    print(Frame.get_all())
+    print(Frame.get("Frame"))
 
 
 def bar_test():
@@ -30,10 +34,9 @@ def frame_test():
     test_content = """<b><bright_white>Hello<reset> <u>World<reset>!
 <hr>
 <cyan_bg><black><i> This is a test. <reset>
-Welcome to the world of <bright_blue>Pyt<bright_yellow>ho<yellow>n<reset>!"""
+Welcome to the world of <bright_blue>Pyt<bright_yellow>hon<reset>!"""
     frame = Frame(test_content, 2, frame_style="<bright_cyan>")
     with frame as f:
-        f.print_frame()
         sleep(1)
         f.add_horizontal_rule().add_line("This is a new line").print_frame()
         sleep(1)

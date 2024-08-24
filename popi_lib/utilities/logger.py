@@ -2,6 +2,9 @@ import logging
 from typing import Literal
 from datetime import datetime
 
+from popi_lib.escape_codes import terminal_supports_colors as tsc
+
+
 class ColorCodes:
     GRAY = "\x1b[37m"
     WHITE = "\x1b[97m"
@@ -10,21 +13,31 @@ class ColorCodes:
     BOLD_RED = "\x1b[31;1m"
     BOLD_STRONG_RED = "\x1b[91;1m"
     BOLD_GREEN = "\x1b[01;32m"
-    BOLD_YELLOW = "\x1b[01;38;5;226m"
+    BOLD_YELLOW = "\x1b[01;38;5;214m"
     RESET = "\x1b[0m"
     RESET_WEIGHT = "\x1b[22m"
 
+
 class CustomFormatter(logging.Formatter):
-    default_time_format = "%Y-%m-%d %H:%M"
+    default_time_format = "%Y-%m-%d %H:%M:%S"
     _fmt = "{message}"
 
-    FORMATS = {
-        logging.DEBUG: f"\033[38;5;30m[{{asctime}}] {ColorCodes.GRAY + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
-        logging.INFO: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_GREEN + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.WHITE + _fmt + ColorCodes.RESET,
-        logging.WARNING: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_YELLOW + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.YELLOW + _fmt + ColorCodes.RESET,
-        logging.ERROR: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_RED + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
-        logging.CRITICAL: f"\033[01;38;5;203m[{{asctime}}] {ColorCodes.BOLD_STRONG_RED + '{levelname:>8s}'}: " + _fmt + ColorCodes.RESET
-    }
+    if tsc():
+        FORMATS = {
+            logging.DEBUG: f"\033[38;5;30m[{{asctime}}] {ColorCodes.GRAY + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
+            logging.INFO: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_GREEN + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.WHITE + _fmt + ColorCodes.RESET,
+            logging.WARNING: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_YELLOW + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.YELLOW + _fmt + ColorCodes.RESET,
+            logging.ERROR: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_RED + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
+            logging.CRITICAL: f"\033[01;38;5;203m[{{asctime}}] {ColorCodes.BOLD_STRONG_RED + '{levelname:>8s}'}: " + _fmt + ColorCodes.RESET
+        }
+    else:
+        FORMATS = {
+            logging.DEBUG: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
+            logging.INFO: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
+            logging.WARNING: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
+            logging.ERROR: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
+            logging.CRITICAL: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt
+        }
 
     def __init__(self, style: Literal["%", "{", "$"] = "{", datefmt: str = default_time_format):
         super().__init__(style=style, datefmt=datefmt)
@@ -42,6 +55,7 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt, datefmt=self.datefmt, style='{')
         return formatter.format(record)
 
+
 class CustomLogger(logging.Logger):
     def __init__(self, name: str = __name__, debug: bool = False) -> None:
         super().__init__(name)
@@ -49,6 +63,7 @@ class CustomLogger(logging.Logger):
         handler.setFormatter(CustomFormatter())
         self.addHandler(handler)
         self.setLevel(logging.DEBUG if debug else logging.INFO)
+
 
 if __name__ == "__main__":
     logger = CustomLogger(debug=True)

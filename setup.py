@@ -1,3 +1,4 @@
+import colorama
 from setuptools import setup, find_packages
 
 setup(
@@ -5,6 +6,7 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=[
+        colorama
         # add required packages here
     ],
     author="Popa",
