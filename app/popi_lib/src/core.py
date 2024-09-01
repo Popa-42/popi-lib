@@ -1,28 +1,9 @@
 from __future__ import annotations
-from popi_lib.utilities.logger import CustomLogger
+from .logger import CustomLogger
 
 
 class Registrar(type):
-    """
-    Metaclass for registering classes.
-
-    Usage
-    _____
-
-    >>> class MyClass(metaclass=Registrar):
-    ...     pass
-
-    >>> MyClass.get_all()  # Returns a dictionary of all registered classes
-    {'MyClass': <class '__main__.MyClass'>}
-
-    >>> MyClass.get("MyClass")  # Returns the class MyClass
-    <class '__main__.MyClass'>
-
-    >>> MyClass.clear()  # Clears the registry
-
-    >>> MyClass.get_all()
-    {}
-    """
+    """Metaclass for registering classes."""
     registry = {}
 
     def __new__(cls, name, bases, dct) -> Registrar:

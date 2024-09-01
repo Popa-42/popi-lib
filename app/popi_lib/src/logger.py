@@ -2,7 +2,7 @@ import logging
 from typing import Literal
 from datetime import datetime
 
-from popi_lib.escape_codes import terminal_supports_colors as tsc
+from .escape_codes import terminal_supports_colors as tsc
 
 
 class ColorCodes:
@@ -24,22 +24,23 @@ class CustomFormatter(logging.Formatter):
 
     if tsc():
         FORMATS = {
-            logging.DEBUG: f"\033[38;5;30m[{{asctime}}] {ColorCodes.GRAY + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
-            logging.INFO: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_GREEN + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.WHITE + _fmt + ColorCodes.RESET,
-            logging.WARNING: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_YELLOW + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.YELLOW + _fmt + ColorCodes.RESET,
-            logging.ERROR: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_RED + '{levelname:>8s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
-            logging.CRITICAL: f"\033[01;38;5;203m[{{asctime}}] {ColorCodes.BOLD_STRONG_RED + '{levelname:>8s}'}: " + _fmt + ColorCodes.RESET
+            logging.DEBUG: f"\033[38;5;30m[{{asctime}}] {ColorCodes.GRAY + '{levelname:>5s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
+            logging.INFO: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_GREEN + '{levelname:>5s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.WHITE + _fmt + ColorCodes.RESET,
+            logging.WARNING: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_YELLOW + '{levelname:>5s}' + ColorCodes.RESET_WEIGHT}: " + ColorCodes.YELLOW + _fmt + ColorCodes.RESET,
+            logging.ERROR: f"\033[38;5;44m[{{asctime}}] {ColorCodes.BOLD_RED + '{levelname:>5s}' + ColorCodes.RESET_WEIGHT}: " + _fmt + ColorCodes.RESET,
+            logging.CRITICAL: f"\033[01;38;5;203m[{{asctime}}] {ColorCodes.BOLD_STRONG_RED + '{levelname:>5s}'}: " + _fmt + ColorCodes.RESET
         }
     else:
         FORMATS = {
-            logging.DEBUG: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
-            logging.INFO: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
-            logging.WARNING: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
-            logging.ERROR: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt,
-            logging.CRITICAL: f"[{{asctime}}] {'{levelname:>8s}'}: " + _fmt
+            logging.DEBUG: f"[{{asctime}}] {'{levelname:>5s}'}: " + _fmt,
+            logging.INFO: f"[{{asctime}}] {'{levelname:>5s}'}: " + _fmt,
+            logging.WARNING: f"[{{asctime}}] {'{levelname:>5s}'}: " + _fmt,
+            logging.ERROR: f"[{{asctime}}] {'{levelname:>5s}'}: " + _fmt,
+            logging.CRITICAL: f"[{{asctime}}] {'{levelname:>5s}'}: " + _fmt
         }
 
     def __init__(self, style: Literal["%", "{", "$"] = "{", datefmt: str = default_time_format):
+        logging.addLevelName(logging.WARNING, "WARN")
         super().__init__(style=style, datefmt=datefmt)
 
     def formatTime(self, record, datefmt=None):

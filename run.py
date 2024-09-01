@@ -1,18 +1,17 @@
 from time import sleep
 
-from popi_lib.utilities.progressbar import Bar, FiraCodeProgressBar
-from popi_lib.utilities.frame import Frame
-
+from popi_lib import Bar, FiraCodeProgressBar, Frame
 
 total = 24
 length = 25
 
 
 def main():
-    # bar_test()
-    # frame_test()
-    print(Frame.get_all())
-    print(Frame.get("Frame"))
+    bar_test()
+    frame_test()
+    # print(Frame)
+    # print(Frame.get_all())
+    # print(Frame.get("Frame"))
 
 
 def bar_test():
