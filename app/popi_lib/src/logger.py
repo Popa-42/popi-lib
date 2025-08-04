@@ -64,6 +64,7 @@ class CustomLogger(logging.Logger):
         handler.setFormatter(CustomFormatter())
         self.addHandler(handler)
         self.setLevel(logging.DEBUG if debug else logging.INFO)
+        self.warn = self.warning
 
 
 if __name__ == "__main__":
