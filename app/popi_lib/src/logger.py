@@ -2,7 +2,7 @@ import logging
 from typing import Literal
 from datetime import datetime
 
-from .escape_codes import terminal_supports_colors as tsc
+from popi_lib.src.escape_codes import terminal_supports_colors as tsc
 
 
 class ColorCodes:

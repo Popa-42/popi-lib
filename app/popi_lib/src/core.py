@@ -1,5 +1,5 @@
 from __future__ import annotations
-from .logger import CustomLogger
+from popi_lib.src.logger import CustomLogger
 
 
 class Registrar(type):

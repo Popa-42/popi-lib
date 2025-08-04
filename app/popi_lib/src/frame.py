@@ -2,8 +2,8 @@ from __future__ import annotations
 import sys
 from functools import reduce
 
-from .core import Base
-from .escape_codes import (
+from popi_lib.src.core import Base
+from popi_lib.src.escape_codes import (
     text2escape as t2e,
     escape_code_dict,
     terminal_supports_colors as tsc

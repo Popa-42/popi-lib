@@ -1,7 +1,7 @@
 import sys
 from typing import Optional
 
-from .core import Base
+from popi_lib.src.core import Base
 
 
 class ProgressBar(Base):
